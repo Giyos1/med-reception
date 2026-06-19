@@ -1,0 +1,7 @@
+from rest_framework.permissions import BasePermission
+
+
+class IsAdministrator(BasePermission):
+    def has_permission(self, request, view):
+        # Foydalanuvchi login qilganmi va roli Administrator-mi — shuni tekshiradi
+        return request.user.is_authenticated and request.user.role == 'Administrator'
