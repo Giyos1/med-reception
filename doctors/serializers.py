@@ -4,8 +4,6 @@ from doctors.models import Doctor
 
 
 class DoctorCreateSerializer(serializers.ModelSerializer):
-    phone_number   = serializers.CharField(required=True)
-    password       = serializers.CharField(write_only=True, required=True, min_length=8)
     specialization = serializers.CharField(required=True, write_only=True)
     procedure_cost = serializers.DecimalField(required=True, max_digits=10, decimal_places=2, write_only=True)
 
@@ -20,6 +18,10 @@ class DoctorCreateSerializer(serializers.ModelSerializer):
             'specialization',
             'procedure_cost',
         ]
+        extra_kwargs = {
+            'password':     {'write_only': True, 'required': True},
+            'phone_number': {'required': True},
+        }
 
     def validate_phone_number(self, value):
         if User.objects.filter(phone_number=value).exists():
