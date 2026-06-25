@@ -1,6 +1,10 @@
-from django.urls import path
-from .views import AdminDoctorCreateView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import AdminDoctorViewSet
+
+router = DefaultRouter()
+router.register(r'admin/doctors', AdminDoctorViewSet, basename='admin-doctor')
 
 urlpatterns = [
-    path('admin/doctors/', AdminDoctorCreateView.as_view(), name='admin-doctor-create'),
+    path('', include(router.urls)),
 ]

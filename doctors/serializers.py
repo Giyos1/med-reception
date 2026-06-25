@@ -1,18 +1,25 @@
 from rest_framework import serializers
 from users.models import User
-from .models import Doctor
+from doctors.models import Doctor
 
 
-class DoctorCreateSerializer(serializers.Serializer):
-    # User
-    phone_number = serializers.CharField(required=True)
-    password     = serializers.CharField(write_only=True, required=True, min_length=8)
-    first_name   = serializers.CharField(required=False, default='')
-    last_name    = serializers.CharField(required=False, default='')
+class DoctorCreateSerializer(serializers.ModelSerializer):
+    phone_number   = serializers.CharField(required=True)
+    password       = serializers.CharField(write_only=True, required=True, min_length=8)
+    specialization = serializers.CharField(required=True, write_only=True)
+    procedure_cost = serializers.DecimalField(required=True, max_digits=10, decimal_places=2, write_only=True)
 
-    # Doctor
-    specialization = serializers.CharField(required=True)
-    procedure_cost = serializers.DecimalField(required=True, max_digits=10, decimal_places=2)
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'phone_number',
+            'password',
+            'first_name',
+            'last_name',
+            'specialization',
+            'procedure_cost',
+        ]
 
     def validate_phone_number(self, value):
         if User.objects.filter(phone_number=value).exists():
@@ -20,27 +27,22 @@ class DoctorCreateSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
+        specialization = validated_data.pop('specialization')
+        procedure_cost = validated_data.pop('procedure_cost')
+        password       = validated_data.pop('password')
+        phone_number   = validated_data.get('phone_number')
+
         user = User.objects.create_user(
-            username=validated_data['phone_number'],
-            phone_number=validated_data['phone_number'],
-            password=validated_data['password'],
+            username=phone_number,
+            phone_number=phone_number,
+            password=password,
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             role='shifokor',
         )
-        doctor = Doctor.objects.create(
+        Doctor.objects.create(
             user=user,
-            specialization=validated_data['specialization'],
-            procedure_cost=validated_data['procedure_cost'],
+            specialization=specialization,
+            procedure_cost=procedure_cost,
         )
-        return doctor
-
-    def to_representation(self, instance):
-        return {
-            'id':             instance.id,
-            'phone_number':   instance.user.phone_number,
-            'first_name':     instance.user.first_name,
-            'last_name':      instance.user.last_name,
-            'specialization': instance.specialization,
-            'procedure_cost': str(instance.procedure_cost),
-        }
+        return user
