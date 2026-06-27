@@ -1,4 +1,6 @@
 from django.urls import path
+from rest_framework import routers
+from patients.views import PatientView
 from users.views import LoginView, LogoutView, CustomTokenRefreshView
 
 urlpatterns = [
