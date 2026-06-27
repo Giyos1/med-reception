@@ -6,4 +6,4 @@ from rest_framework import serializers
 class PatientSubmitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = 'registration_number,condition'
+        fields ="__all__"
